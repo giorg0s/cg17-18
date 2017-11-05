@@ -1,1 +1,3 @@
+cglib is a utility library for the CG exercise framework.
+
 

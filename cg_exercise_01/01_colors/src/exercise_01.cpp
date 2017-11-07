@@ -23,9 +23,8 @@ void draw_triangles(
 
 	for (uint i = 0; i < vertices.size(); ++i)
 	{
-		glColor3f(colors[i][0], colors[i][1], colors[i][2]);
-		glVertex3f(vertices[i][0], vertices[i][1], vertices[i][2]);
-	}
+		glColor3f(colors[i].x, colors[i].y, colors[i].z);
+		glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z);	}
 	
 	glEnd();
 
@@ -162,6 +161,17 @@ void generate_strip(
 
 	vertices->clear();
 
+	for (std::uint32_t j=0; j<=N; ++j) 
+    {
+        for (std::uint32_t i=0; i<=N; ++i)
+        {
+            float x = (float)i/(float)N;
+            float y = (float)j/(float)N;
+            float z = 0;
+            vertices->push_back(glm::vec3(x, y, z));
+        }
+    }
+
 }
 
 /*
@@ -174,11 +184,21 @@ void draw_triangle_strip(
 {
 	cg_assert(vertices.size() == colors.size());
 
+	glFrontFace(GL_CW); //Counter clockwise
+	glBegin(GL_TRIANGLE_STRIP);
+
+	for (uint i = 0; i < vertices.size(); ++i)
+	{
+		glColor3f(colors[i].x, colors[i].y, colors[i].z);
+		glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z);
+	}
+	
+	glEnd();
+
 }
 
 /*
- * Integrate the given piecewise linear function 
- * using trapezoidal integration.
+ *  
  *
  * The function is given at points
  *     x[0], ..., x[N]
@@ -191,6 +211,7 @@ float integrate_trapezoidal(
 {
 	cg_assert(x.size() == y.size());
 	cg_assert(x.size() > 1);
+
 
 	return 0.f;
 }

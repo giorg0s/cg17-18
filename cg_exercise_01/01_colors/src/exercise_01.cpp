@@ -24,7 +24,8 @@ void draw_triangles(
 	for (uint i = 0; i < vertices.size(); ++i)
 	{
 		glColor3f(colors[i].x, colors[i].y, colors[i].z);
-		glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z);	}
+		glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z);	
+	}
 	
 	glEnd();
 
@@ -161,15 +162,21 @@ void generate_strip(
 
 	vertices->clear();
 
-	for (std::uint32_t j=0; j<=N; ++j) 
+	/*for (std::uint32_t j=0; j<=N; ++j) 
     {
-        for (std::uint32_t i=0; i<=N; ++i)
+        for (std::uint32_t i=1; i<=N; ++i)
         {
             float x = (float)i/(float)N;
             float y = (float)j/(float)N;
-            float z = 0;
-            vertices->push_back(glm::vec3(x, y, z));
+            vertices->push_back(glm::vec3(x, y, 0));
         }
+    }*/
+
+	for (std::uint32_t i=0; i <= N; ++i)
+	{
+		float x = (float)i/(float)N;
+	    vertices->push_back(glm::vec3(x, 1, 0));  // even row
+	    vertices->push_back(glm::vec3(x, 0, 0));  // odd row
     }
 
 }
@@ -184,15 +191,16 @@ void draw_triangle_strip(
 {
 	cg_assert(vertices.size() == colors.size());
 
-	glFrontFace(GL_CW); //Counter clockwise
 	glBegin(GL_TRIANGLE_STRIP);
+	glFrontFace(GL_CCW);
 
 	for (uint i = 0; i < vertices.size(); ++i)
 	{
-		glColor3f(colors[i].x, colors[i].y, colors[i].z);
 		glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z);
+		glColor3f(colors[i].x, colors[i].y, colors[i].z);
 	}
-	
+
+
 	glEnd();
 
 }
@@ -212,8 +220,35 @@ float integrate_trapezoidal(
 	cg_assert(x.size() == y.size());
 	cg_assert(x.size() > 1);
 
+	/*float a = x[0];	//primer punto (limite inferior)
+	float b = x[x.size()]; //ultimo punto (limite superior)
+	float a_value = y[0]; //f(a)
+	float b_value = y[y.size()]; //f(b)
 
-	return 0.f;
+	float t = a - b;
+	float num = a_value + b_value;
+
+	float integral = t*(num/2);*/
+
+
+	float n = x.size();        //n is for subintervals 
+    float sum = 0,integral;
+
+    float a_value = y[0];
+    float b_value = y[n];       
+    
+    float h = (b_value - a_value) / n;	
+
+    for (uint32_t i=1;i<n;i++)            //loop to evaluate h*(y1+...+yn-1)
+    {
+        sum = sum + h * y[i];
+    }
+
+    integral = h/2.0 * (y[0] + y[n]) + sum;  
+
+
+
+	return integral;
 }
 
 /*
@@ -231,8 +266,27 @@ float integrate_trapezoidal(
  */
 glm::vec3 spectrum_to_rgb(std::vector<float> const& spectrum)
 {
+	std::vector<float> mul_x (spectrum.size());
+	std::vector<float> mul_y (spectrum.size());
+	std::vector<float> mul_z (spectrum.size());
+	std::vector<glm::vec3> rgb;
+
 	cg_assert(spectrum.size() == cmf::wavelengths.size());
 
-	return glm::vec3(0.f);
+
+	for (uint32_t i = 0; i < spectrum.size(); ++i)
+	{
+		mul_x[i] = spectrum[i]*cmf::x[i];
+		mul_y[i] = spectrum[i]*cmf::x[i];	
+		mul_z[i] = spectrum[i]*cmf::x[i];			
+	}
+	for (int i = 0; i < spectrum.size(); ++i)
+	{
+		rgb[i].x = mul_x[i]; 
+		rgb[i].y = mul_y[i]; 
+		rgb[i].z = mul_z[i];
+	}
+
+	return rgb;
 }
 // CG_REVISION 1d384085f04ade0a730db0ed88bbd9f2df80dad9
